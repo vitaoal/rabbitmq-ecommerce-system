@@ -46,9 +46,12 @@ def main():
                 order_id = key
                 print("Enviando pedido para a fila 'order_queue'...")
                 # Assina a mensagem com a sua chave privada
+                # Necessário converter para hexadecimal para enviar pq não sei concatenar bytes
                 signature = sign(order_id.encode(), private_key)
-                message = order_id + '||' + str(signature)
+                signature = signature.hex()
+                message = f"{order_id}|{signature}"
                 # Envia a mensagem para a exchange 'order_type' com a chave do pedido
+                print(f" [x] Sent {message}")
                 channel.basic_publish(exchange='order_type', routing_key=order_id, body=message)
                 break
     

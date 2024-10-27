@@ -9,15 +9,16 @@ def initConnection(host = 'localhost'):
     return channel
 
 def callback(ch, method, properties, body):
-    message, signature = body.decode().split('||')
+    body = body.decode()
+    print(f" [x] Received {body}")
+    message, signature = body.split('|', 1)
+
+    signature = bytes.fromhex(signature)
     public_key = load_public_key(r'keys\client\public_key.pem')
-    
+
     # Verifica a assinatura da mensagem com a chave pública do fornecedor
-    is_valid = verify(signature.encode(), message.encode(), public_key)
-    if is_valid:
-        print(f" [x] Received {message} - Assinatura válida")
-    else:
-        print(" [x] Received %r" % message)
+    is_valid = verify(signature, message.encode(), public_key)
+    print(f" [x] Received {message} - Assinatura válida: {is_valid}")
 
 def main():
     print("Iniciando fornecedor...")
