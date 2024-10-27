@@ -1,5 +1,6 @@
 import pika
 import sys
+from asym_cript import *
 
 def initConnection(host = 'localhost'):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host))
@@ -8,7 +9,15 @@ def initConnection(host = 'localhost'):
     return channel
 
 def callback(ch, method, properties, body):
-    print(" [x] Received %r" % body)
+    message, signature = body.decode().split('||')
+    public_key = load_public_key(r'keys\client\public_key.pem')
+    
+    # Verifica a assinatura da mensagem com a chave pública do fornecedor
+    is_valid = verify(signature.encode(), message.encode(), public_key)
+    if is_valid:
+        print(f" [x] Received {message} - Assinatura válida")
+    else:
+        print(" [x] Received %r" % message)
 
 def main():
     print("Iniciando fornecedor...")

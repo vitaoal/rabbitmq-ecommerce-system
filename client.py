@@ -1,5 +1,6 @@
 import pika
 import sys
+from asym_cript import *
 
 ORDERS = {
     'order.clothes': 'Jaqueta Nike',
@@ -13,7 +14,6 @@ def initConnection(host = 'localhost'):
     """
     connection = pika.BlockingConnection(pika.ConnectionParameters(host))
     channel = connection.channel()
-    channel.queue_declare(queue='notification_queue')       # Será usada posteriormente
     return channel
 
 def main():
@@ -22,8 +22,11 @@ def main():
     channel = initConnection()
 
     # Cria a exchange 'order_type' para enviar mensagens
-    # utilizando o roteamento'topic', um tópico por categoria de pedido
+    # utilizando o roteamento 'topic', um tópico por categoria de pedido
     channel.exchange_declare(exchange='order_type', exchange_type='topic')
+
+    # Carrega a sua chave privada
+    private_key = load_private_key(r'keys\client\private_key.pem')
 
     while True:
         print("\n === E-COMMERCE ONLINE === ")
@@ -42,7 +45,11 @@ def main():
             if str(i) == option:
                 order_id = key
                 print("Enviando pedido para a fila 'order_queue'...")
-                channel.basic_publish(exchange='order_type', routing_key=order_id, body=order_id)
+                # Assina a mensagem com a sua chave privada
+                signature = sign(order_id.encode(), private_key)
+                message = order_id + '||' + str(signature)
+                # Envia a mensagem para a exchange 'order_type' com a chave do pedido
+                channel.basic_publish(exchange='order_type', routing_key=order_id, body=message)
                 break
     
     print("Fechando conexão...")
