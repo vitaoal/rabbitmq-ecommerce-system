@@ -42,8 +42,10 @@ def main():
             break
 
         for i, (key, value) in enumerate(ORDERS.items()):
-            if str(i) == option:
-                order_id = key
+            if str(i) == str(option):
+                print(f"\n Enviando pedido: {value}")
+
+                order_id = value
                 print("Enviando pedido para a fila 'order_queue'...")
                 # Assina a mensagem com a sua chave privada
                 # Necessário converter para hexadecimal para enviar pq não sei concatenar bytes
@@ -51,8 +53,8 @@ def main():
                 signature = signature.hex()
                 message = f"{order_id}|{signature}"
                 # Envia a mensagem para a exchange 'order_type' com a chave do pedido
-                print(f" [x] Sent {message}")
-                channel.basic_publish(exchange='order_type', routing_key=order_id, body=message)
+                print(f" [x] Sent {order_id}")
+                channel.basic_publish(exchange='order_type', routing_key=key, body=message)
                 break
     
     print("Fechando conexão...")

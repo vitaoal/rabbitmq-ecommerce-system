@@ -1,5 +1,6 @@
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
+import os
 
 DEBUG = False
 
@@ -67,6 +68,7 @@ def load_private_key(path):
     return private_key
 
 def main():
+     
     print("Gerando par de chaves...")
     private_key, public_key = generate_keys()
     with open(r"keys\client\private_key.pem", "wb") as file:
@@ -80,6 +82,26 @@ def main():
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ))
+          
+
+    for x in range(1,4):
+
+        directory = f"keys/supplier_{x}"
+
+        private_key, public_key = generate_keys()
+        with open(os.path.join(directory, "private_key.pem"), "wb") as file:
+            file.write(private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+        ))
+        with open(os.path.join(directory, "public_key.pem"), "wb") as file:
+
+            file.write(public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ))
+        x = x + 1
 
     if DEBUG:
         print("Carregando chaves do arquivo...")
