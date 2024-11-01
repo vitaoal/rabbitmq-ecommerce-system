@@ -3,6 +3,8 @@ import sys
 from functools import partial
 from asym_cript import *
 
+SELF_NAME = 'supplier_3'
+
 def initConnection(host='localhost'):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host))
     channel = connection.channel()
@@ -22,7 +24,7 @@ def callback(ch, method, properties, body, private, channel2):
 
         message2 = ' '.join(sys.argv[1:]) or "Geladeira Brastemp"
         signature = sign(message2.encode(), private).hex()
-        message1 = f"{message2}|{signature}"
+        message1 = f"{SELF_NAME}|{message2}|{signature}"
 
         channel2.basic_publish(
                 exchange='',

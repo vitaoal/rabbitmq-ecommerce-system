@@ -22,26 +22,19 @@ def initConnection(host = 'localhost'):
 def callback(ch, method, properties, body):
     body = body.decode()
     #print(f" [x] Received {body}")
-    message, signature = body.split('|', 1)
+    author, message, signature = body.split('|', 2)
     print(f" [x] Received {message}")
 
     signature = bytes.fromhex(signature)
-    # Lista de caminhos para as chaves públicas dos fornecedores
 
-    supplier_keys = [
-            r'keys\supplier_1\public_key.pem',
-            r'keys\supplier_2\public_key.pem',
-            r'keys\supplier_3\public_key.pem',
-        ]
+    key_path = f'keys\\{author}\\public_key.pem'
 
     # Verifica a assinatura com cada chave pública
-    for key_path in supplier_keys:
-        public_key = load_public_key(key_path)
-        is_valid = verify(signature, message.encode(), public_key)
+    public_key = load_public_key(key_path)
+    is_valid = verify(signature, message.encode(), public_key)
        
-        if is_valid:
-            print(f"Assinatura verificada com sucesso usando {public_key}")
-            break  # Pare de verificar com outras chaves se a assinatura é válida
+    if is_valid:
+        print(f"Assinatura verificada com sucesso usando {public_key}")
 
 def main():
     
